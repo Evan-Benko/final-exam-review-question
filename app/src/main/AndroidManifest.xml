@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--permissions we need-->
+    <!--INTERNET for retrofit calls to the quote api-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!--needed so workmanager can post notifcations on android 13+-->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!--foreground service perm for the habit timer-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <application
+        android:allowBackup="true"
+        android:label="HabitTracker"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+
+        <!-- main activity where everything lives, compose handles all the UI from here-->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--broadcast reciever for battery low-->
+        <!--we register this in code instead of here because BATTERY_LOW is implicit and needs runtime registration on newer android-->
+        <receiver
+            android:name=".receiver.BatteryReceiver"
+            android:exported="false" />
+
+        <!-- foreground service for tracking a habit timer-->
+        <service
+            android:name=".service.HabitTimerService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
+
+    </application>
+</manifest>
