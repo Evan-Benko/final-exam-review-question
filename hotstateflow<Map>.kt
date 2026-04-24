@@ -51,3 +51,34 @@ fun updateEntry(key: String, value: String) {
 //Lifecycle Safety: When collecting a transformed flow
 //in Android, always use repeatOnLifecycle to
 //avoid processing updates while the UI is in the background
+
+
+//Use a MutableStateFlow to hold a Map<String, WeatherInfo>,
+// where the key is the city name. To ensure the UI updates,
+// you must provide a new map instance whenever data changes
+
+
+class WeatherViewModel : ViewModel() {
+    // A hot flow holding our "source of truth" map
+    private val _cityWeatherMap = MutableStateFlow<Map<String, WeatherInfo>>(emptyMap())
+    val cityWeatherMap: StateFlow<Map<String, WeatherInfo>> = _cityWeatherMap.asStateFlow()
+
+    // Example: Updating a specific city's weather
+    fun updateCityWeather(cityName: String, info: WeatherInfo) {
+        _cityWeatherMap.update { currentMap ->
+            // Create a new map instance with the updated entry
+            currentMap + (cityName to info)
+        }
+    }
+}
+
+//transform stateflow for UI
+val rainyCities: StateFlow<List<String>> = cityWeatherMap
+    .map { map ->
+        map.filter { it.value.condition == "Rain" }.keys.toList()
+    }
+    .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000), // Resource-safe
+        initialValue = emptyList()
+    )
